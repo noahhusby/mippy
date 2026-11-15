@@ -1,5 +1,12 @@
 
-from alu import ALU, MASK32
+"""
+ECE 485 - MIPS Single-Cycle CPU
+Author: Noah Husby
+File: cpu.py
+Description: CPU datapath and instruction execution.
+"""
+
+from alu import ALU
 from registers import RegisterFile
 from memory import Memory
 from decoder import Decoder
@@ -9,7 +16,6 @@ class CPU:
 
     def __init__(self, memory_size: int = 1024):
         self.registers = RegisterFile()
-        self.instruction_memory = Memory(memory_size)
         self.data_memory = Memory(memory_size)
         self.pc = 0
         self.alu = ALU()

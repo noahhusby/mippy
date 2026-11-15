@@ -1,5 +1,10 @@
 
-"""Main entry point for the MIPS CPU simulator."""
+"""
+ECE 485 - MIPS Single-Cycle CPU
+Author: Noah Husby
+File: main.py
+Description: CPU simulation entry point and sample program.
+"""
 
 from assembler import assemble
 from cpu import CPU

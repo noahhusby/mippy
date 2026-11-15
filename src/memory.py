@@ -1,5 +1,11 @@
 
-MASK32 = 0xFFFFFFFF
+"""
+ECE 485 - MIPS Single-Cycle CPU
+Author: Noah Husby
+File: memory.py
+Description: 32-bit word-addressable memory implementation.
+"""
+from const import MASK32
 
 
 class Memory:

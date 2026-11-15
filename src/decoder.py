@@ -1,7 +1,14 @@
 
-"""32-bit MIPS instruction decoder."""
+"""
+ECE 485 - MIPS Single-Cycle CPU
+Author: Noah Husby
+File: decoder.py
+Description: MIPS machine instruction decoding.
+"""
 
 from dataclasses import dataclass
+
+from const import OPCODES
 
 
 @dataclass(frozen=True)
@@ -21,15 +28,6 @@ class Instruction:
 
 class Decoder:
     """Decode 32-bit MIPS machine instructions."""
-
-    # Supported instruction opcodes
-    OPCODES = {
-        0x23: "lw",
-        0x2B: "sw",
-        0x04: "beq",
-        0x05: "bne",
-        0x0C: "andi",
-    }
 
     # R-format function codes
     FUNCTIONS = {
@@ -66,9 +64,9 @@ class Decoder:
             if shamt != 0:
                 raise ValueError("ADD instruction requires shamt = 0")
 
-        elif opcode in Decoder.OPCODES:
+        elif opcode in OPCODES:
             # I-format instruction
-            name = Decoder.OPCODES[opcode]
+            name = OPCODES[opcode]
             instruction_format = "I"
 
         else:

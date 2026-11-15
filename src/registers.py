@@ -1,5 +1,11 @@
 
-MASK32 = 0xFFFFFFFF
+"""
+ECE 485 - MIPS Single-Cycle CPU
+Author: Noah Husby
+File: registers.py
+Description: 32-bit MIPS general-purpose register file.
+"""
+from const import MASK32
 
 
 class RegisterFile:

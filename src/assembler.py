@@ -1,7 +1,14 @@
 
-"""Assembler for the six supported MIPS instructions."""
+"""
+ECE 485 - MIPS Single-Cycle CPU
+Author: Noah Husby
+File: assembler.py
+Description: MIPS assembly to machine code conversion.
+"""
 
 import re
+
+from const import OPCODES
 
 REGISTERS = {
     "zero": 0, "at": 1,
@@ -15,15 +22,6 @@ REGISTERS = {
     "k0": 26, "k1": 27,
     "gp": 28, "sp": 29, "fp": 30, "ra": 31,
 }
-
-OPCODES = {
-    "lw": 0x23,
-    "sw": 0x2B,
-    "beq": 0x04,
-    "bne": 0x05,
-    "andi": 0x0C,
-}
-
 
 def register_number(name: str) -> int:
     """Convert a register name into its 5-bit index."""
