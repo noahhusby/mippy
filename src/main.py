@@ -45,16 +45,16 @@ def _test_lw() -> None:
     cpu = CPU()
 
     cpu.registers.write(18, 100)   # $s2
-    cpu.data_memory.write(400, 75)
+    cpu.data_memory.write(400, 33)
 
     instructions = assemble(program)
     cpu.instruction_memory.load(instructions)
 
     _run_sim(cpu, instructions)
 
-    assert cpu.registers.read(11) == 75
+    assert cpu.registers.read(11) == 33
     assert cpu.registers.read(18) == 100
-    assert cpu.data_memory.read(400) == 75
+    assert cpu.data_memory.read(400) == 33
     assert cpu.pc == 1
 
 def _test_sw() -> None:
@@ -64,15 +64,15 @@ def _test_sw() -> None:
     cpu = CPU()
 
     cpu.registers.write(23, 100)  # $s7
-    cpu.registers.write(14, 75)   # $t6
+    cpu.registers.write(14, 61)   # $t6
 
     instructions = assemble(program)
     cpu.instruction_memory.load(instructions)
 
     _run_sim(cpu, instructions)
 
-    assert cpu.data_memory.read(500) == 75
-    assert cpu.registers.read(14) == 75
+    assert cpu.data_memory.read(500) == 61
+    assert cpu.registers.read(14) == 61
     assert cpu.registers.read(23) == 100
     assert cpu.pc == 1
 
@@ -82,17 +82,17 @@ def _test_add() -> None:
     print("\n------------------\nRunning simulation for program:\n" + program)
     cpu = CPU()
 
-    cpu.registers.write(11, 25)  # $t3
-    cpu.registers.write(17, 50)  # $s1
+    cpu.registers.write(11, 44)  # $t3
+    cpu.registers.write(17, 22)  # $s1
 
     instructions = assemble(program)
     cpu.instruction_memory.load(instructions)
 
     _run_sim(cpu, instructions)
 
-    assert cpu.registers.read(13) == 75  # $t5
-    assert cpu.registers.read(11) == 25
-    assert cpu.registers.read(17) == 50
+    assert cpu.registers.read(13) == 66  # $t5
+    assert cpu.registers.read(11) == 44
+    assert cpu.registers.read(17) == 22
     assert cpu.pc == 1
 
 def _test_bne() -> None:
