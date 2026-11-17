@@ -7,8 +7,7 @@ Description: CPU datapath and instruction execution.
 """
 
 from alu import ALU, ALUOperation
-from registers import RegisterFile
-from memory import Memory
+from reg_mem import Memory, RegisterFile
 from decoder import Decoder
 
 class CPU:
