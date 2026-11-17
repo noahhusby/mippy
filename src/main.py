@@ -156,6 +156,38 @@ def _test_andi() -> None:
     assert cpu.registers.read(8) == 42
     assert cpu.pc == 1
 
+def _test_combined() -> None:
+    """Test multiple instructions executing together."""
+    program = """
+    lw $t0, 10($s0)
+    add $t1, $t0, $t0
+    sw $t1, 20($s0)
+    bne $t0, $t1, 1
+    andi $t2, $t1, 15
+    beq $t0, $t0, 1
+    add $t3, $t0, $t1
+    lw $t4, 20($s0)
+    """
+
+    print("\n------------------\nRunning simulation for program:\n" + program)
+    cpu = CPU()
+
+    cpu.registers.write(16, 100)  # $s0
+    cpu.data_memory.write(110, 25)
+
+    instructions = assemble(program)
+    cpu.instruction_memory.load(instructions)
+
+    _run_sim(cpu, instructions)
+
+    assert cpu.registers.read(8) == 25    # $t0: loaded value
+    assert cpu.registers.read(9) == 50    # $t1: addition result
+    assert cpu.registers.read(10) == 0    # $t2: skipped by BNE
+    assert cpu.registers.read(11) == 0    # $t3: skipped by BEQ
+    assert cpu.registers.read(12) == 50   # $t4: loaded stored value
+    assert cpu.data_memory.read(120) == 50
+    assert cpu.pc == 8
+
 def main() -> None:
     print("Mippy Simulation Suite - Noah Husby")
     _test_lw()
@@ -164,6 +196,7 @@ def main() -> None:
     _test_bne()
     _test_beq()
     _test_andi()
+    _test_combined()
 
 
 if __name__ == "__main__":
