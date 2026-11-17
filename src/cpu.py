@@ -6,7 +6,7 @@ File: cpu.py
 Description: CPU datapath and instruction execution.
 """
 
-from alu import ALU
+from alu import ALU, ALUOperation
 from registers import RegisterFile
 from memory import Memory
 from decoder import Decoder
@@ -17,6 +17,7 @@ class CPU:
     def __init__(self, memory_size: int = 1024):
         self.registers = RegisterFile()
         self.data_memory = Memory(memory_size)
+        self.instruction_memory = Memory(memory_size)
         self.pc = 0
         self.alu = ALU()
 
@@ -55,7 +56,7 @@ class CPU:
             result = self.alu.execute(
                 self.read_register(rs),
                 self.read_register(rt),
-                "ADD",
+                ALUOperation.ADD,
             )
             self.write_register(rd, result)
 
@@ -63,7 +64,7 @@ class CPU:
             address = self.alu.execute(
                 self.read_register(rs),
                 self.sign_extend(immediate),
-                "ADD",
+                ALUOperation.ADD,
             )
             self.write_register(rt, self.read_memory(address))
 
@@ -71,7 +72,7 @@ class CPU:
             address = self.alu.execute(
                 self.read_register(rs),
                 self.sign_extend(immediate),
-                "ADD",
+                ALUOperation.ADD,
             )
             self.write_memory(address, self.read_register(rt))
 
@@ -79,7 +80,7 @@ class CPU:
             difference = self.alu.execute(
                 self.read_register(rs),
                 self.read_register(rt),
-                "SUB",
+                ALUOperation.SUB,
             )
             if difference == 0:
                 next_pc += self.sign_extend(immediate)
@@ -88,7 +89,7 @@ class CPU:
             difference = self.alu.execute(
                 self.read_register(rs),
                 self.read_register(rt),
-                "SUB",
+                ALUOperation.SUB,
             )
             if difference != 0:
                 next_pc += self.sign_extend(immediate)
@@ -97,7 +98,7 @@ class CPU:
             result = self.alu.execute(
                 self.read_register(rs),
                 immediate,
-                "AND",
+                ALUOperation.AND,
             )
             self.write_register(rt, result)
 

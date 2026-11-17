@@ -5,64 +5,13 @@ Author: Noah Husby
 File: main.py
 Description: CPU simulation entry point and sample program.
 """
-
 from assembler import assemble
 from cpu import CPU
 
+def _run_sim(cpu: CPU, instructions: list[int]) -> None:
+    print("\nRunning simulation...:")
 
-PROGRAM = """
-    # Load values from data memory
-    lw   $t0, 100($zero)
-    lw   $t1, 101($zero)
-
-    # Add the two values
-    add  $t2, $t0, $t1
-
-    # Apply a bitwise mask
-    andi $t3, $t2, 0x000F
-
-    # Store the result
-    sw   $t3, 102($zero)
-
-    # Test BEQ: branch is taken
-    beq  $t0, $t0, equal
-
-    # Skipped when BEQ is taken
-    add  $t4, $t0, $t1
-
-equal:
-    # Test BNE: branch is taken
-    bne  $t0, $t1, done
-
-    # Skipped when BNE is taken
-    add  $t5, $t0, $t1
-
-done:
-"""
-
-
-def main() -> None:
-    cpu = CPU()
-    instructions = assemble(PROGRAM)
-
-    # Initialize sample data
-    cpu.data_memory.write(100, 10)
-    cpu.data_memory.write(101, 20)
-
-    # Load machine code into instruction memory
-    cpu.instruction_memory.load(instructions)
-
-    print("MIPS CPU Simulation")
-    print("=" * 60)
-
-    print("\nAssembled instructions:")
-    for address, instruction in enumerate(instructions):
-        print(f"{address:04d}: 0x{instruction:08X}")
-
-    print("\nExecution:")
     cycle = 0
-
-    # Execute until PC leaves the loaded program.
     while 0 <= cpu.pc < len(instructions):
         current_pc = cpu.pc
         instruction = cpu.instruction_memory.read(current_pc)
@@ -80,23 +29,141 @@ def main() -> None:
         if cycle >= 100:
             raise RuntimeError("Maximum cycle count exceeded")
 
-    print("\nFinal register state:")
-    cpu.registers.dump()
+    print("\nFinal register state (only non-zero registers shown):")
+    print(cpu.registers)
+    print("\nData memory (only non-zero memory values shown):")
+    print(cpu.data_memory)
 
-    print("\nData memory:")
-    cpu.data_memory.dump(100, 3)
-
-    # Verify expected results
-    assert cpu.registers.read(8) == 10
-    assert cpu.registers.read(9) == 20
-    assert cpu.registers.read(10) == 30
-    assert cpu.registers.read(11) == 14
-    assert cpu.registers.read(12) == 0
-    assert cpu.registers.read(13) == 0
-    assert cpu.data_memory.read(102) == 14
 
     print(f"\nSimulation completed in {cycle} cycles.")
-    print("All result checks passed.")
+
+
+def _test_lw() -> None:
+    """Test the specified load word command."""
+    program = "lw $t3, 300($s2)"
+    print("\n------------------\nRunning simulation for program:\n" + program)
+    cpu = CPU()
+
+    cpu.registers.write(18, 100)   # $s2
+    cpu.data_memory.write(400, 75)
+
+    instructions = assemble(program)
+    cpu.instruction_memory.load(instructions)
+
+    _run_sim(cpu, instructions)
+
+    assert cpu.registers.read(11) == 75
+    assert cpu.registers.read(18) == 100
+    assert cpu.data_memory.read(400) == 75
+    assert cpu.pc == 1
+
+def _test_sw() -> None:
+    """Test the specified store word command."""
+    program = "sw $t6, 400($s7)"
+    print("\n------------------\nRunning simulation for program:\n" + program)
+    cpu = CPU()
+
+    cpu.registers.write(23, 100)  # $s7
+    cpu.registers.write(14, 75)   # $t6
+
+    instructions = assemble(program)
+    cpu.instruction_memory.load(instructions)
+
+    _run_sim(cpu, instructions)
+
+    assert cpu.data_memory.read(500) == 75
+    assert cpu.registers.read(14) == 75
+    assert cpu.registers.read(23) == 100
+    assert cpu.pc == 1
+
+def _test_add() -> None:
+    """Test the specified add command."""
+    program = "add $t5, $t3, $s1"
+    print("\n------------------\nRunning simulation for program:\n" + program)
+    cpu = CPU()
+
+    cpu.registers.write(11, 25)  # $t3
+    cpu.registers.write(17, 50)  # $s1
+
+    instructions = assemble(program)
+    cpu.instruction_memory.load(instructions)
+
+    _run_sim(cpu, instructions)
+
+    assert cpu.registers.read(13) == 75  # $t5
+    assert cpu.registers.read(11) == 25
+    assert cpu.registers.read(17) == 50
+    assert cpu.pc == 1
+
+def _test_bne() -> None:
+    """Test the specified branch not equal command."""
+    program = """
+    bne $s6, $t5, 200
+    add $t0, $s6, $t5
+    """
+
+    print("\n------------------\nRunning simulation for program:\n" + program)
+    cpu = CPU()
+
+    cpu.registers.write(22, 10)  # $s6
+    cpu.registers.write(13, 10)  # $t5
+
+    instructions = assemble(program)
+    cpu.instruction_memory.load(instructions)
+
+    _run_sim(cpu, instructions)
+
+    assert cpu.registers.read(8) == 20
+    assert cpu.pc == 2
+
+def _test_beq() -> None:
+    """Test the branch equal command."""
+    program = "\n".join([
+        "beq $t0, $t1, 1",
+        "andi $t2, $zero, 1",
+        "andi $t3, $t0, 15",
+    ])
+
+    print("\n------------------\nRunning simulation for program:\n" + program)
+    cpu = CPU()
+
+    cpu.registers.write(8, 25)  # $t0
+    cpu.registers.write(9, 25)  # $t1
+
+    instructions = assemble(program)
+    cpu.instruction_memory.load(instructions)
+
+    _run_sim(cpu, instructions)
+
+    assert cpu.registers.read(10) == 0   # $t2 skipped
+    assert cpu.registers.read(11) == 9   # 25 & 15 = 9
+    assert cpu.pc == 3
+
+def _test_andi() -> None:
+    """Test the AND immediate command."""
+    program = "andi $t1, $t0, 15"
+    print("\n------------------\nRunning simulation for program:\n" + program)
+    cpu = CPU()
+
+    cpu.registers.write(8, 42)  # $t0
+
+    instructions = assemble(program)
+    cpu.instruction_memory.load(instructions)
+
+    _run_sim(cpu, instructions)
+
+    assert cpu.registers.read(9) == 10  # $t1
+    assert cpu.registers.read(8) == 42
+    assert cpu.pc == 1
+
+def main() -> None:
+    print("Mippy Simulation Suite - Noah Husby")
+    _test_lw()
+    _test_sw()
+    _test_add()
+    _test_bne()
+    _test_beq()
+    _test_andi()
 
 
 if __name__ == "__main__":
